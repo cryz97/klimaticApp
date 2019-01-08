@@ -12,12 +12,18 @@ class Klimatic extends StatefulWidget {
 
 class _KlimaticState extends State<Klimatic> {
 
+  String _cityEntered;
+
   Future _goToNextScreen(BuildContext context) async {
     Map results = await Navigator.of(context).push(
       new MaterialPageRoute<Map>(builder: (BuildContext context) {
            return ChangeCity();
       })
     );
+
+    if(results != null && results.containsKey('enter')){
+    _cityEntered = results['enter'];
+    }
   }
 
 
@@ -53,7 +59,7 @@ class _KlimaticState extends State<Klimatic> {
             new Container(
               alignment: Alignment.topRight,
               margin: const EdgeInsets.fromLTRB(0, 11, 21, 0),
-              child: new Text('Aguascalientes',
+              child: new Text('${_cityEntered == null ? util.defaultCity : _cityEntered}',
                 style: cityStyle(),),
             ),
 
@@ -63,9 +69,9 @@ class _KlimaticState extends State<Klimatic> {
             ),
 
             new Container(
-              margin: const EdgeInsets.fromLTRB(30, 290, 0, 0),
+              margin: const EdgeInsets.fromLTRB(30, 360, 0, 0),
               alignment: Alignment.center,
-              child: updateTempWidget('Aguascalientes'),
+              child: updateTempWidget(_cityEntered),
             )
           ],
         ),
@@ -84,7 +90,7 @@ class _KlimaticState extends State<Klimatic> {
 
     Widget updateTempWidget(String city) {
         return new FutureBuilder(
-            future: getWeather(util.appId, city),
+            future: getWeather(util.appId, city == null ? util.defaultCity : city),
             builder: (BuildContext context, AsyncSnapshot<Map> snapshot){
 
               if(snapshot.hasData){
@@ -93,8 +99,18 @@ class _KlimaticState extends State<Klimatic> {
                     child: new Column(
                       children: <Widget>[
                         new ListTile(
-                          title: new Text(content['main']['temp'].toString(),
-                          style: tempStyle(),),
+                          title: new Text(content['main']['temp'].toString() + " C",
+                          style: tempStyle(),
+                          ),
+
+                          subtitle: new ListTile(
+                            title: new Text(
+                              "Humidity: ${content['main']['humidity'].toString()}\n"
+                                  "Min: ${content['main']['temp_min'].toString()} C\n"
+                                  "Max: ${content['main']['temp_max'].toString()} C",
+                                style: extraData(),
+                            ),
+                          ),
                         )
                       ],
                     )
@@ -110,6 +126,8 @@ class _KlimaticState extends State<Klimatic> {
 
 
   class ChangeCity extends StatelessWidget {
+
+    var _cityFieldController = new TextEditingController();
     @override
     Widget build(BuildContext context) {
       return Scaffold(
@@ -127,6 +145,32 @@ class _KlimaticState extends State<Klimatic> {
                 width: 500,
                 height: 1200,
                 fit: BoxFit.fill ,),
+            ),
+
+            new ListView(
+              children: <Widget>[
+                new ListTile(
+                  title: new TextField(
+                    decoration: new InputDecoration(
+                      hintText: 'Enter City',
+                    ),
+                    controller: _cityFieldController,
+                    keyboardType: TextInputType.text,
+
+                  ),
+                ),
+                new ListTile(
+                  title: new FlatButton(
+                      onPressed: (){
+                        Navigator.pop(context, {
+                          'enter': _cityFieldController.text
+                        });
+                      },
+                      textColor: Colors.white70,
+                      color: Colors.redAccent,
+                      child: new Text("Get Weather")),
+                )
+              ],
             )
 
           ],
@@ -144,6 +188,15 @@ TextStyle cityStyle(){
     color: Colors.white,
     fontSize: 23,
     fontStyle: FontStyle.italic
+  );
+}
+
+TextStyle extraData(){
+  return new TextStyle(
+      color: Colors.white70,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w500,
+      fontSize: 20
   );
 }
 
