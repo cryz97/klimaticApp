@@ -12,6 +12,14 @@ class Klimatic extends StatefulWidget {
 
 class _KlimaticState extends State<Klimatic> {
 
+  Future _goToNextScreen(BuildContext context) async {
+    Map results = await Navigator.of(context).push(
+      new MaterialPageRoute<Map>(builder: (BuildContext context) {
+           return ChangeCity();
+      })
+    );
+  }
+
 
   void showStuff() async {
     Map data = await getWeather(util.appId, util.defaultCity);
@@ -22,12 +30,12 @@ class _KlimaticState extends State<Klimatic> {
     Widget build(BuildContext context) {
       return new Scaffold(
         appBar: new AppBar(
-          title: new Text("Klimatic"),
+          title: new Text("Klimatic", textAlign: TextAlign.center,),
           backgroundColor: Colors.deepPurple,
           actions: <Widget>[
             new IconButton(
                 icon: new Icon(Icons.menu),
-                onPressed: showStuff)
+                onPressed: () {_goToNextScreen(context);})
 
           ],
         ),
@@ -45,7 +53,7 @@ class _KlimaticState extends State<Klimatic> {
             new Container(
               alignment: Alignment.topRight,
               margin: const EdgeInsets.fromLTRB(0, 11, 21, 0),
-              child: new Text('Spokane',
+              child: new Text('Aguascalientes',
                 style: cityStyle(),),
             ),
 
@@ -57,8 +65,7 @@ class _KlimaticState extends State<Klimatic> {
             new Container(
               margin: const EdgeInsets.fromLTRB(30, 290, 0, 0),
               alignment: Alignment.center,
-              child: new Text("67.8 C",
-                style: tempStyle(),),
+              child: updateTempWidget('Aguascalientes'),
             )
           ],
         ),
@@ -99,6 +106,33 @@ class _KlimaticState extends State<Klimatic> {
         });
     }
 
+  }
+
+
+  class ChangeCity extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: new AppBar(
+          backgroundColor: Colors.redAccent,
+          title: new Text("Change City"),
+          centerTitle: true,
+        ),
+        body: new Stack(
+          children: <Widget>[
+
+            new Center(
+              child:
+                new Image.asset("images/white_snow.png",
+                width: 500,
+                height: 1200,
+                fit: BoxFit.fill ,),
+            )
+
+          ],
+        ),
+      );
+    }
   }
 
 
